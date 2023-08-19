@@ -7,6 +7,7 @@ import {
   getRouteRegistration,
   getRouteMain,
 } from '../routes/routes';
+import { Auth } from '../pages/Auth';
 
 export const routeConfig: Record<AppRoutes, AppRoutesProps> = {
   [AppRoutes.MAIN_ROUTE]: {
@@ -20,11 +21,11 @@ export const routeConfig: Record<AppRoutes, AppRoutesProps> = {
   },
   [AppRoutes.LOGIN_ROUTE]: {
     path: getRouteLogin(),
-    element: <h2>AUTH</h2>,
+    element: <Auth />,
   },
   [AppRoutes.REGISTRATION_ROUTE]: {
     path: getRouteRegistration(),
-    element: <h2>AUTH</h2>,
+    element: <Auth />,
   },
   [AppRoutes.NOT_FOUND]: {
     path: '*',
