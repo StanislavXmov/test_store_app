@@ -5,9 +5,9 @@ const jwt = require('jsonwebtoken');
 const ApiError = require('../error/apiError');
 const { User } = require('../models/user');
 
-const generateJwt = (id, nickname, role) => {
+const generateJwt = (id, nickname, role, avatar) => {
   return jwt.sign(
-    {id, nickname, role},
+    {id, nickname, role, avatar},
     process.env.SECRET_KEY,
     {expiresIn: '24h'}
   );
@@ -31,7 +31,7 @@ class UserController {
 
     const hashPassword = await bcrypt.hash(password, 5);
     const user = await User.create({nickname, role, password: hashPassword, avatar: fileName,});
-    const token = generateJwt(user.id, nickname, user.role);
+    const token = generateJwt(user.id, nickname, user.role, user.avatar);
     return res.json({token});
   }
 
@@ -45,12 +45,12 @@ class UserController {
     if (!comparePassword) {
       return next(ApiError.internalRequest('user not found'));
     }
-    const token = generateJwt(user.id, user.nickname, user.role);
+    const token = generateJwt(user.id, user.nickname, user.role, user.avatar);
     return res.json({token});
   }
 
   async check (req, res) {
-    const token = generateJwt(req.user.id, req.user.nickname, req.user.role);
+    const token = generateJwt(req.user.id, req.user.nickname, req.user.role, req.user.avatar);
     return res.json({token});
   }
 }
