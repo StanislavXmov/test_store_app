@@ -43,7 +43,6 @@
   border-radius: 4px;
   border: 2px solid var(--color-dark);
   padding: 10px 15px;
-  margin-bottom: 10px;
   font-size: 14px;
   background: var(--color-white);
   outline: none;
@@ -51,6 +50,15 @@
   &:focus {
     outline: 2px solid var(--color-white);
   }
+
+  &::placeholder {
+    color: var(--color-lighter);
+  }
+}
+
+.errorMessage {
+  font-size: 10px;
+  color: crimson;
 }
 
 .submitButton {
@@ -83,5 +91,18 @@
   }
   &:disabled {
     opacity: 0.4;
+    cursor: not-allowed;
   }
+}
+
+.hide {
+  opacity: 0;
+}
+
+.fileName {
+  color: var(--color-lighter);
+}
+
+.lineHeight {
+  line-height: 14px;
 }
