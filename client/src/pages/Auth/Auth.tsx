@@ -1,13 +1,16 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { getRouteLogin } from '../../routes/routes';
+import { getRouteLogin, getRouteMain } from '../../routes/routes';
+import { User, useUser } from '../../store/useUser';
+import { login, registration } from '../../http/userApi';
+import { AxiosError } from 'axios';
 
 import styles from './Auth.module.scss';
 
 interface AuthForm {
   nickname: string;
   password: string;
-  avatar: FileList;
+  avatar?: FileList;
 }
 
 enum ErrorType {
@@ -21,6 +24,8 @@ const errorMessage = {
 }
 
 export const Auth = () => {
+  const setUser = useUser(state => state.setUser);
+  const setIsAuth = useUser(state => state.setIsAuth);
   const location = useLocation();
   const navigate = useNavigate();
   const { 
@@ -37,8 +42,29 @@ export const Auth = () => {
   });
   const isLogin = location.pathname === getRouteLogin();
 
-  const onSubmit: SubmitHandler<AuthForm> = data => {
-    console.log('onSubmit', data);
+  const onSubmit: SubmitHandler<AuthForm> = async data => {
+    try {
+      let user: User;
+      if (isLogin) {
+        user = await login(data.nickname, data.password);
+      } else {
+        const formData = new FormData();
+        formData.append('nickname', data.nickname);
+        formData.append('password', data.password);
+        if (data.avatar) {
+          formData.append('avatar', data.avatar[0] as Blob);
+        }
+
+        user = await registration(formData);
+        console.log(user);
+        
+      }
+      setUser(user);
+      setIsAuth(true);
+      navigate(getRouteMain());
+  } catch (e: unknown) {
+    console.log((e as AxiosError<{message: string}>).response?.data.message);
+  }
   };
 
   return (
@@ -71,23 +97,25 @@ export const Auth = () => {
           {errors.password?.type === ErrorType.minLength && errorMessage[ErrorType.minLength](5)}
         </span>
       </label>
-      <label className={styles.formLabel}>
-        avatar:
-        <input 
-          type='file' 
-          className={styles.hide} 
-          {...register('avatar', {required: 'avatar is required'})} 
-        />
-        <div className={`${styles.formInput} ${styles.lineHeight}`} >
-          {watch('avatar')?.[0]?.name
-            ? (<span>{watch('avatar')[0].name}</span>)
-            : (<span className={styles.fileName} >avatar.png</span>)
-          }
-        </div>
-        <span className={styles.errorMessage}>
-          {errors.avatar?.type === ErrorType.required && errorMessage[ErrorType.required]('avatar')}
-        </span>
-      </label>
+      {!isLogin && (
+        <label className={styles.formLabel}>
+          avatar:
+          <input 
+            type='file' 
+            className={styles.hide} 
+            {...register('avatar', {required: 'avatar is required'})} 
+          />
+          <div className={`${styles.formInput} ${styles.lineHeight}`} >
+            {watch('avatar')?.[0]?.name
+              ? (<span>{watch('avatar')?.[0].name}</span>)
+              : (<span className={styles.fileName} >avatar.png</span>)
+            }
+          </div>
+          <span className={styles.errorMessage}>
+            {errors.avatar?.type === ErrorType.required && errorMessage[ErrorType.required]('avatar')}
+          </span>
+        </label>
+      )}
       <button 
         className={styles.submitButton} 
         type="submit"

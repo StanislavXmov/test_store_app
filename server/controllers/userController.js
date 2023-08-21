@@ -16,8 +16,6 @@ const generateJwt = (id, nickname, role, avatar) => {
 class UserController {
   async registration (req, res, next) {
     const { nickname, password, role } = req.body;
-    console.log(nickname, password, role);
-    
     if (!nickname || !password) {
       return next(ApiError.badRequest('invalid nickname or password'));
     }
